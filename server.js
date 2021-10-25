@@ -1,15 +1,23 @@
 const inquirer = require('inquirer');
 const mysql2 = require('mysql2/promise');
+require('dotenv').config();
 
 async function init() {
     const db = await mysql2.createConnection({
-        host: 'localhost',
-        user: 'root',
-        database: 'employees_db'
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        database: 'employees_db',
+        password: process.env.DB_PASS
     });
 
     async function viewAllDepartments() {
-        // TODO
+        // console.log('viewing all departments');
+        let response = await db.query('SELECT name FROM department');
+        console.log(response);
+        for(row of response[0])
+            console.log(row.name);
+
+        presentOptions();
     }
 
     async function viewAllRoles() {
@@ -37,9 +45,9 @@ async function init() {
     }
 
     async function presentOptions() {
-        let choice = await inquirer.prompt({
+        let response = await inquirer.prompt({
             type: "list",
-            name: "option",
+            name: "selected",
             choices: [
                 "View all departments",
                 "View all roles",
@@ -52,35 +60,39 @@ async function init() {
             message: "Choose an option: "
         });
 
-        switch(choice) {
+        let promise;
+        switch(response.selected) {
             case "View all departments":
-                viewAllDepartments();
+                await viewAllDepartments();
                 break;
 
             case "View all roles":
-                viewAllRoles();
+                await viewAllRoles();
                 break;
 
             case "View all employees":
-                viewAllEmployees();
+                await viewAllEmployees();
                 break;
 
             case "Add department":
-                addDepartment();
+                await addDepartment();
                 break;
 
             case "Add role":
-                addRole();
+                await addRole();
                 break;
 
             case "Add employee":
-                addEmployee();
+                await addEmployee();
                 break;
 
             case "Update role":
-                updateRole();
+                await updateRole();
                 break;
         }
     }
     
+    presentOptions();
 }
+
+init();
