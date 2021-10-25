@@ -12,16 +12,21 @@ async function init() {
 
     async function viewAllDepartments() {
         // console.log('viewing all departments');
-        let response = await db.query('SELECT name FROM department');
-        console.log(response);
-        for(row of response[0])
+        let [rows] = await db.query('SELECT name FROM department');
+        for(row of rows)
             console.log(row.name);
 
         presentOptions();
     }
 
     async function viewAllRoles() {
-        // TODO
+        let [rows] = await db.query('SELECT title, salary FROM role');
+        // console.log(response);
+        console.log('Title, Salary');
+        for(row of rows)
+            console.log(`${row.title}, ${row.salary}`);
+
+        presentOptions();
     }
 
     async function viewAllEmployees() {
