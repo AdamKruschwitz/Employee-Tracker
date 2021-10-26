@@ -1,7 +1,8 @@
-const db = require('./connection');
+
+const {getTableMap} = require('./utils');
 
 // View all roles
-async function viewAll() {
+async function viewAll(db) {
     let [rows] = await db.query('SELECT title, salary FROM role;');
     // console.log(response);
     console.log('Title, Salary');
@@ -11,7 +12,8 @@ async function viewAll() {
 }
 
 // Prompts the user to add a new role
-async function add() {
+async function add(db) {
+    // TODO: get department ID.
     let {title, salary} = await inquirer.prompt([
         {
             name: "title",
@@ -36,8 +38,8 @@ async function add() {
 }
 
 // Prompts the user to update a role.
-async function update() {
-    let rolesMap = await getTableMap('title', 'role');
+async function update(db) {
+    let rolesMap = await getTableMap('title', 'role', db);
     let roles = Array.from(rolesMap.keys());
 
     let {role_name, title, salary} = await inquirer.prompt([
@@ -61,7 +63,7 @@ async function update() {
     console.log([title, salary, role_id]);
     if(!title || !salary) { 
         console.log("Must include a title and a salary");
-        await update();
+        await update(db);
         return;
     }
 
@@ -69,7 +71,7 @@ async function update() {
     return;
 }
 
-async function remove() {
+async function remove(db) {
     // TODO
 }
 

@@ -1,7 +1,7 @@
-const db = require('./connection');
+const {getTableMap} = require('./utils');
 
 // Views all employees
-async function viewAll() {
+async function viewAll(db) {
     let [rows] = await db.query(
         `SELECT e.first_name, e.last_name, r.title 
         FROM employee AS e 
@@ -15,8 +15,8 @@ async function viewAll() {
 }
 
 // Prompts a user to add a new employee
-async function add() {
-    let rolesMap = await getTableMap('title', 'role');
+async function add(db) {
+    let rolesMap = await getTableMap('title', 'role', db);
     let roles = Array.from(rolesMap.keys()); // .keys returns an iterable, inquirer choices wants an array
 
     [response] = await db.query('SELECT id, first_name, last_name FROM employee;');
@@ -53,7 +53,7 @@ async function add() {
 
     if(!first_name || !last_name) {
         console.log('Must include a first name and last name.');
-        await add();
+        await add(db);
         return;
     }
 
@@ -70,19 +70,19 @@ async function add() {
     return;
 }
 
-async function update() {
+async function update(db) {
     // TODO
 }
 
-async function remove() {
+async function remove(db) {
     // TODO
 }
 
-async function viewByManager() {
+async function viewByManager(db) {
     // TODO
 }
 
-async function viewByDepartment() {
+async function viewByDepartment(db) {
     // TODO
 }
 
