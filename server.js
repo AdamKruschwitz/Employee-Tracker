@@ -30,7 +30,17 @@ async function init() {
     }
 
     async function viewAllEmployees() {
-        // TODO
+        let [rows] = await db.query(
+            `SELECT e.first_name, e.last_name, r.title 
+            FROM employee AS e 
+            JOIN role AS r 
+            ON e.role_id=r.id`);
+        
+        console.log('Name, Title');
+        for(row of rows) 
+            console.log(`${row.first_name} ${row.last_name}, ${row.title}`);
+
+        presentOptions();
     }
 
     async function addDepartment() {
