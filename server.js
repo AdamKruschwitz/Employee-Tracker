@@ -44,7 +44,21 @@ async function init() {
     }
 
     async function addDepartment() {
-        // TODO
+        let {name} = await inquirer.prompt({
+            name: "name",
+            message: "Input the new department's name."
+        });
+
+        if(!name) {
+            console.log('Please enter a department name.');
+            await addDepartment(); // Awaiting and returning to avoid duplicate queries without an else statement.
+            return;
+        }
+        
+        db.query('INSERT INTO department (name) VALUES (?)', [name]);
+        console.log(`Department ${name} added.`);
+
+        presentOptions();
     }
 
     async function addRole() {
