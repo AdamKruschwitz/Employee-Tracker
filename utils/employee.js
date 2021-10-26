@@ -102,7 +102,28 @@ async function update(db) {
 }
 
 async function remove(db) {
-    // TODO
+    const employeesMap = await getEmployeesMap(db);
+    const employees = Array.from(employeesMap.keys());
+
+    let {employee} = await inquirer.prompt({
+        name: "employee",
+        type: "list",
+        message: "Choose an employee to delete: ",
+        choices: employees
+    });
+
+    let {confirm} = await inquirer.prompt({
+        name: "confirm",
+        type: "confirm",
+        message: `Are you sure you want to delete ${employee}?`
+    });
+
+    if(confirm) {
+        let employee_id = employeesMap.get(employee);
+        db.query("DELETE FROM employee WHERE id=?", [employee_id]);
+        console.log(`Employee ${employee} deleted successfully.`);
+    }
+    return;
 }
 
 async function viewByManager(db) {
