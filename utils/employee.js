@@ -151,7 +151,23 @@ async function viewByManager(db) {
 }
 
 async function viewByDepartment(db) {
-    // TODO
+    const departmentsMap = await getTableMap('name', 'department', db);
+    const departments = Array.from(departmentsMap.keys());
+
+    const {department} = await inquirer.prompt({
+        name: "department",
+        type: "list",
+        message: "Choose a department to filter employees by: ",
+        choices: departments
+    });
+
+    const department_id = departmentsMap.get(department);
+    const [employees] = await db.query('SELECT employee.first_name, employee.last_name FROM employee JOIN role ON employee.role_id=role.id WHERE department_id=?', [department_id]);
+    console.log(`Employees of ${department}: `);
+    for(employee of employees) {
+        console.log(employee.first_name + " " + employee.last_name);
+    }
+    return;
 }
 
 module.exports = {
