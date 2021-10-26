@@ -13,7 +13,7 @@ async function viewAll(db) {
 
 // Prompts the user to add a new role
 async function add(db) {
-    // TODO: get department ID.
+    // TODO: get role ID.
     let {title, salary} = await inquirer.prompt([
         {
             name: "title",
@@ -72,7 +72,33 @@ async function update(db) {
 }
 
 async function remove(db) {
-    // TODO
+    console.log('Removing role');
+    let rolesMap = await getTableMap('title', 'role', db);
+    let roles = Array.from(rolesMap.keys());
+    let {role_name} = await inquirer.prompt({
+        name: "role_name",
+        type: "list",
+        message: "Select a role to delete: ",
+        choices: roles
+    });
+    let role_id = rolesMap.get(role_name);
+    let [employees] = await db.query('SELECT first_name, last_name FROM employee WHERE role_id=?', [role_id]);
+    let employees_list = "";
+    for(employee of employees)
+        employees_list += employee.first_name + " " + employee.last_name + "\n";
+
+    let {confirmed} = await inquirer.prompt({
+        name: "confirmed",
+        type: "confirm",
+        message: `Are you sure you'd like to delete role ${role_name}? You'll need to update each of these users: \n${employees_list}` 
+    });
+
+    if(confirmed) {
+        await db.query('DELETE FROM role WHERE id=?', [role_id]);
+        console.log(`Role ${role_name} deleted successfully.`);
+    }
+
+    return;
 }
 
 module.exports = {

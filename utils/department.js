@@ -51,6 +51,7 @@ async function remove(db) {
         let department_id = departmentsMap.get(department_name);
         await db.query('DELETE FROM department WHERE id=?', [department_id]);
         await db.query('DELETE FROM role WHERE department_id=?', [department_id]);
+        console.log('department deleted successfully')
     }
 
     return;

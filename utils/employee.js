@@ -1,4 +1,16 @@
+const inquirer = require('inquirer');
 const {getTableMap} = require('./utils');
+
+async function getEmployeesMap(db) {
+    const [response] = await db.query('SELECT id, first_name, last_name FROM employee;');
+    let employeesMap = new Map();
+    for(row of response) {
+        let fullName = `${row.first_name} ${row.last_name}`;
+        employeesMap.set(fullName, row.id);
+    }
+
+    return employeesMap;
+}
 
 // Views all employees
 async function viewAll(db) {
@@ -19,14 +31,8 @@ async function add(db) {
     let rolesMap = await getTableMap('title', 'role', db);
     let roles = Array.from(rolesMap.keys()); // .keys returns an iterable, inquirer choices wants an array
 
-    [response] = await db.query('SELECT id, first_name, last_name FROM employee;');
-    let employees = [];
-    let employeesMap = new Map();
-    for(row of response) {
-        let fullName = `${row.first_name} ${row.last_name}`;
-        employees.push(fullName);
-        employeesMap.set(fullName, row.id);
-    }
+    const employeesMap = await getEmployeesMap(db);
+    let employees = Array.from(employeesMap.keys());
 
     let {first_name, last_name, role_name, manager_name} = await inquirer.prompt([
         {
@@ -71,7 +77,28 @@ async function add(db) {
 }
 
 async function update(db) {
-    // TODO
+    const employeesMap = await getEmployeesMap(db);
+    const employees = Array.from(employeesMap.keys());
+
+    const {employeeToEdit, newManager} = await inquirer.prompt([
+        {
+            name: "employeeToEdit",
+            type: "list",
+            message: "Choose an employee to edit",
+            choices: employees
+        },
+        {
+            name: "newManager",
+            type: "list",
+            message: "Choose a new manager for this employee",
+            choices: employees
+        }
+    ]);
+    let employee_id = employeesMap.get(employeeToEdit);
+    let manager_id = employeesMap.get(newManager);
+    await db.query('UPDATE employee SET manager_id=? WHERE id=?', [manager_id, employee_id]);
+    console.log(`Employee ${employeeToEdit} updated with new manager ${newManager}`);
+    return;
 }
 
 async function remove(db) {

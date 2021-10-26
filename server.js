@@ -28,7 +28,7 @@ async function presentOptions(db) {
             "Add role",
             "Add employee",
             "Update role",
-            "Update employee",
+            "Update employee manager",
             "View employees by manager",
             "View employees by department",
             "Delete department",
@@ -68,7 +68,7 @@ async function presentOptions(db) {
             await role.update(db);
             break;
 
-        case "Update employee":
+        case "Update employee manager":
             await employee.update(db);
             break;
 
