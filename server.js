@@ -15,8 +15,7 @@ async function init() {
         let [rows] = await db.query('SELECT name FROM department');
         for(row of rows)
             console.log(row.name);
-
-        presentOptions();
+        return;
     }
 
     async function viewAllRoles() {
@@ -25,8 +24,7 @@ async function init() {
         console.log('Title, Salary');
         for(row of rows)
             console.log(`${row.title}, ${row.salary}`);
-
-        presentOptions();
+        return;
     }
 
     async function viewAllEmployees() {
@@ -39,8 +37,7 @@ async function init() {
         console.log('Name, Title');
         for(row of rows) 
             console.log(`${row.first_name} ${row.last_name}, ${row.title}`);
-
-        presentOptions();
+        return;
     }
 
     async function addDepartment() {
@@ -50,19 +47,36 @@ async function init() {
         });
 
         if(!name) {
-            console.log('Please enter a department name.');
+            console.log('Please enter a department name: ');
             await addDepartment(); // Awaiting and returning to avoid duplicate queries without an else statement.
             return;
         }
         
-        db.query('INSERT INTO department (name) VALUES (?)', [name]);
+        await db.query('INSERT INTO department (name) VALUES (?)', [name]);
         console.log(`Department ${name} added.`);
-
-        presentOptions();
+        return;
     }
 
     async function addRole() {
-        // TODO
+        let {title, salary} = await inquirer.prompt([
+            {
+                name: "title",
+                message: "Please ender the new role's title: "
+            },
+            {
+                name: "salary",
+                message: "Please enter the new role's salary: "
+            }
+        ]);
+        if(!title || !salary) {
+            console.log("You must enter a title and a salary");
+            await addRole();
+            return;
+        }
+
+        await db.query('INSERT INTO role (title, salary) VALUES (?, ?)', [title, salary]);
+        console.log(`Role ${title} with salary ${salary} added.`);
+        return;
     }
 
     async function addEmployee() {
@@ -119,6 +133,7 @@ async function init() {
                 await updateRole();
                 break;
         }
+        presentOptions();
     }
     
     presentOptions();
