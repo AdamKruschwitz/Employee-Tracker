@@ -57,7 +57,20 @@ async function remove(db) {
 }
 
 async function viewBudget(db) {
-    // TODO
+    const departmentMap = await getTableMap('name', 'department', db);
+    const departments = Array.from(departmentMap.keys());
+    const {department_name} = await inquirer.prompt({
+        name: "department_name",
+        type:"list",
+        message: "Choose a department to see the total budget",
+        choices: departments
+    });
+
+    let department_id = departmentMap.get(department_name);
+    const [[{sum}]] = await db.query('SELECT SUM(salary) AS sum FROM employee JOIN role ON employee.role_id=role.id WHERE role.department_id=?;', [department_id]);
+    
+    console.log(`The budget for ${department_name} is $${sum}`);
+    return;
 }
 
 module.exports = {
