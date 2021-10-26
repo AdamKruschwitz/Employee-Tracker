@@ -127,7 +127,27 @@ async function remove(db) {
 }
 
 async function viewByManager(db) {
-    // TODO
+    const employeesMap = await getEmployeesMap(db);
+    const employees = Array.from(employeesMap.keys());
+
+    const {manager} = await inquirer.prompt({
+        name: "manager",
+        type: "list",
+        message: "Choose an employee to see who they manage: ",
+        choices: employees
+    });
+
+    const manager_id = employeesMap.get(manager);
+    const [managed_employees] = await db.query('SELECT first_name, last_name FROM employee WHERE manager_id=?', [manager_id]);
+    let employees_list = "";
+    for(managed_employee of managed_employees) {
+        employees_list += "\n" + managed_employee.first_name + " " + managed_employee.last_name 
+    }
+    // If there are no managed employees
+    if(!employees_list) employees_list = "nobody";
+
+    console.log(`Employee ${manager} manages ${employees_list}`);
+    return;
 }
 
 async function viewByDepartment(db) {
