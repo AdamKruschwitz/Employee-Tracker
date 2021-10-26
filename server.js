@@ -10,6 +10,17 @@ async function init() {
         password: process.env.DB_PASS
     });
 
+    // Returns a map of a given column to that entries id.
+    async function getTableMap(column, table) {
+        let out = new Map();
+        let [rows] = await db.query(`SELECT id, ${column} FROM ${table};`);
+        for(row of rows) {
+            out.set(row[column], row.id);
+        }
+
+        return out;
+    }
+
     async function viewAllDepartments() {
         // console.log('viewing all departments');
         let [rows] = await db.query('SELECT name FROM department;');
@@ -82,13 +93,8 @@ async function init() {
     }
 
     async function addEmployee() {
-        let [response] = await db.query('SELECT id, title FROM role;');
-        let roles = [];
-        let rolesMap = new Map();
-        for(row of response) {
-            roles.push(row.title);
-            rolesMap.set(row.title, row.id);
-        }
+        let rolesMap = await getTableMap('title', 'role');
+        let roles = Array.from(rolesMap.keys()); // .keys returns an iterable, inquirer choices wants an array
 
         [response] = await db.query('SELECT id, first_name, last_name FROM employee;');
         let employees = [];
@@ -142,7 +148,36 @@ async function init() {
     }
 
     async function updateRole() {
-        // TODO
+        let rolesMap = await getTableMap('title', 'role');
+        let roles = Array.from(rolesMap.keys());
+
+        let {role_name, title, salary} = await inquirer.prompt([
+            {
+                name: "role_name",
+                type: "list",
+                message: "Please choose a role to update: ",
+                choices: roles
+            },
+            {
+                name: "title",
+                message: "Please enter the updated title: "
+            },
+            {
+                name: "salary",
+                message: "Please enter the updated salary: "
+            }
+        ]);
+
+        let role_id = rolesMap.get(role_name);
+        console.log([title, salary, role_id]);
+        if(!title || !salary) { 
+            console.log("Must include a title and a salary");
+            await updateRole();
+            return;
+        }
+
+        await db.query('UPDATE role SET title=?, salary=? WHERE id=?', [title, parseInt(salary), role_id]);
+        return;
     }
 
     async function presentOptions() {
