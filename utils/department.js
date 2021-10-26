@@ -44,13 +44,13 @@ async function remove(db) {
     let {confirmed} = await inquirer.prompt({
         name: "confirmed",
         type: "confirm",
-        message: `Are you sure you'd like to delete department ${department_name} and all included roles?`
+        message: `Are you sure you'd like to delete department ${department_name} and all included roles and employees?`
     });
 
     if(confirmed) {
         let department_id = departmentsMap.get(department_name);
-        await db.query('DELETE FROM department WHERE id=?', [department_id]);
-        await db.query('DELETE FROM role WHERE department_id=?', [department_id]);
+        await db.query('DELETE FROM department WHERE id=?;', [department_id]);
+        // await db.query('DELETE FROM role WHERE department_id=?;', [department_id]);
         console.log('department deleted successfully')
     }
 

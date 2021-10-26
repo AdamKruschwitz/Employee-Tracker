@@ -1,20 +1,31 @@
 
 const {getTableMap} = require('./utils');
+const inquirer = require('inquirer');
 
 // View all roles
 async function viewAll(db) {
-    let [rows] = await db.query('SELECT title, salary FROM role;');
+    let [rows] = await db.query('SELECT * FROM role;');
     // console.log(response);
-    console.log('Title, Salary');
-    for(row of rows)
-        console.log(`${row.title}, ${row.salary}`);
+    console.log('Title, Salary, department');
+    const [departments] = await db.query('SELECT * FROM department;');
+    const idToName = new Map();
+    for(department of departments) {
+        idToName.set(department.id, department.name);
+    }
+
+    
+    for(row of rows) {
+        let department = idToName.get(row.department_id)
+        console.log(`${row.title}, ${row.salary}, ${department}`);
+    }
     return;
 }
 
 // Prompts the user to add a new role
 async function add(db) {
-    // TODO: get role ID.
-    let {title, salary} = await inquirer.prompt([
+    const departmentsMap = await getTableMap('name', 'department', db);
+    const departments = Array.from(departmentsMap.keys());
+    let {title, salary, department} = await inquirer.prompt([
         {
             name: "title",
             message: "Please ender the new role's title: "
@@ -22,6 +33,12 @@ async function add(db) {
         {
             name: "salary",
             message: "Please enter the new role's salary: "
+        },
+        {
+            name: "department",
+            type: "list",
+            message: "Please choose a department for this role to be in.",
+            choices: departments
         }
     ]);
     if(!title || !salary) {
@@ -29,10 +46,10 @@ async function add(db) {
         await add();
         return;
     }
-
+    const department_id = departmentsMap.get(department);
     await db.query(
-        'INSERT INTO role (title, salary) VALUES (?, ?);', 
-        [title, salary]);
+        'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);', 
+        [title, salary, department_id]);
     console.log(`Role ${title} with salary ${salary} added.`);
     return;
 }
@@ -60,7 +77,7 @@ async function update(db) {
     ]);
 
     let role_id = rolesMap.get(role_name);
-    console.log([title, salary, role_id]);
+    // console.log([title, salary, role_id]);
     if(!title || !salary) { 
         console.log("Must include a title and a salary");
         await update(db);
@@ -90,7 +107,7 @@ async function remove(db) {
     let {confirmed} = await inquirer.prompt({
         name: "confirmed",
         type: "confirm",
-        message: `Are you sure you'd like to delete role ${role_name}? You'll need to update each of these users: \n${employees_list}` 
+        message: `Are you sure you'd like to delete role ${role_name}? The following users will be deleted: \n${employees_list}` 
     });
 
     if(confirmed) {
