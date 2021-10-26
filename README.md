@@ -12,7 +12,7 @@
 ## Description
 A command line app for tracking employees in a business. Uses a persistent database and with promise based SQL queries. Created for the UC Berkley full stack web development bootcamp.
 
-## Link to a demo video [here](#)
+## Link to a demo video [here](https://watch.screencastify.com/v/acPYAMXUZyBSwdxRp2zB)
 
 ## Installation instructions
 Clone the repository, run npm install, install mysql, and then from the root of the project run ```npm start```
